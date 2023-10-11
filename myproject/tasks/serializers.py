@@ -1,0 +1,28 @@
+# jwt_auth/serializers.py
+from rest_framework import serializers
+from .models import User
+from .models import Task
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password']
+        extra_kwargs = {
+            'password': { 'write_only': True }
+        }
+
+    def create(self, validate_data):
+        password = validate_data.pop('password', None)
+        instance = self.Meta.model(**validate_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    # owner = serializers.ReadOnlyField(source='owner.username')
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'description', 'status', 'due_date']
+
